@@ -1,0 +1,14 @@
+# Secrets and state — never commit
+*.tfvars
+.terraform/
+terraform.tfstate*
+*.pem
+*.key
+
+# Private working notes (real addresses, hostnames, inventory)
+docs/private/
+inventory-private.md
+
+# OS / editor
+.DS_Store
+*.swp

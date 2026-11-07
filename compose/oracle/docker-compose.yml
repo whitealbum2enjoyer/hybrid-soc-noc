@@ -1,0 +1,36 @@
+# Milestone 2 — cloud side (Oracle ARM instance, 2 OCPU / 12 GB total budget)
+# Availability monitoring ONLY: this stack watches whether home is reachable.
+# Keep it light — short Prometheus retention, no Grafana public exposure
+# (Grafana binds to the private VCN address / tunnel only).
+# NOT deployed yet — M2 work, after the M1 tunnel exists.
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1 # arm64 supported
+    volumes:
+      - kuma-data:/app/data
+    ports:
+      - "3001:3001" # behind reverse proxy; public page uses generic labels only
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest # arm64 supported
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d" # small box, short retention on purpose
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest # arm64 supported
+    volumes:
+      - grafana-data:/var/lib/grafana
+    # No public port mapping on purpose — access via WireGuard tunnel only.
+    network_mode: "host"
+    restart: unless-stopped
+
+volumes:
+  kuma-data:
+  prom-data:
+  grafana-data:
